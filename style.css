@@ -55,3 +55,9 @@ button {
 button:hover {
     background-color: #1557b0;
 }
+
+.result-content {
+    line-height: 1.7;
+    color: #333333;
+    white-space: pre-wrap;
+}
