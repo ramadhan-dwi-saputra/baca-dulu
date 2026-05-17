@@ -48,6 +48,12 @@ section h2 {
     color: #111111;
 }
 
+#upload-hint {
+    font-size: 14px;
+    color: #666666;
+    margin-bottom: 16px;
+}
+
 input[type="file"] {
     display: block;
     margin-bottom: 16px;
