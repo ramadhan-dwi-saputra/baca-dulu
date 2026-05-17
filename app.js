@@ -41,7 +41,15 @@ analyzeBtn.addEventListener('click', function() {
                                 }
                             },
                             {
-                                text: 'Jelaskan isi dokumen ini dalam bahasa Indonesia yang sederhana dan mudah dipahami oleh orang awam. Gunakan bahasa sehari-hari.'
+                                text: `Kamu adalah asisten yang membantu orang Indonesia memahami dokumen legal dan administratif.
+
+                                Jelaskan isi dokumen ini dengan:
+                                - Bahasa Indonesia sehari-hari yang mudah dipahami orang awam
+                                - Struktur yang jelas: mulai dari ringkasan singkat, lalu penjelasan per bagian/pasal
+                                - Highlight hal-hal penting yang perlu diperhatikan sebelum tanda tangan
+                                - Akhiri dengan catatan: "Dokumen ini hanya dijelaskan untuk membantu pemahaman, bukan nasihat hukum resmi."
+
+                                Gunakan format yang rapi dengan heading dan poin-poin.`
                             }
                         ]
                     }]

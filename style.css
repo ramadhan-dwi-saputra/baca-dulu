@@ -61,3 +61,35 @@ button:hover {
     color: #333333;
     white-space: pre-wrap;
 }
+
+.result-content h1,
+.result-content h2,
+.result-content h3 {
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #111111;
+}
+
+.result-content p {
+    margin-bottom: 12px;
+}
+
+.result-content ul,
+.result-content ol {
+    margin-left: 20px;
+    margin-bottom: 12px;
+}
+
+.result-content li {
+    margin-bottom: 6px;
+}
+
+.result-content hr {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 20px 0;
+}
+
+.result-content strong {
+    color: #111111;
+}
