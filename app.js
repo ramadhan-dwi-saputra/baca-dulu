@@ -15,6 +15,10 @@ analyzeBtn.addEventListener('click', function() {
         alert('Pilih dokumen terlebih dahulu.');
         return;
     }
+
+    tampilkanLoading();
+    analyzeBtn.disabled = true;
+    analyzeBtn.textContent = 'Menganalisis...';
     
     const GEMINI_API_KEY = 'ISI_API_KEY';
 
@@ -41,15 +45,15 @@ analyzeBtn.addEventListener('click', function() {
                                 }
                             },
                             {
-                                text: `Kamu adalah asisten yang membantu orang Indonesia memahami dokumen legal dan administratif.
+text: `Kamu adalah asisten yang membantu orang Indonesia memahami dokumen legal dan administratif.
 
-                                Jelaskan isi dokumen ini dengan:
-                                - Bahasa Indonesia sehari-hari yang mudah dipahami orang awam
-                                - Struktur yang jelas: mulai dari ringkasan singkat, lalu penjelasan per bagian/pasal
-                                - Highlight hal-hal penting yang perlu diperhatikan sebelum tanda tangan
-                                - Akhiri dengan catatan: "Dokumen ini hanya dijelaskan untuk membantu pemahaman, bukan nasihat hukum resmi."
+Jelaskan isi dokumen ini dengan:
+- Bahasa Indonesia sehari-hari yang mudah dipahami orang awam
+- Struktur yang jelas: mulai dari ringkasan singkat, lalu penjelasan per bagian/pasal
+- Highlight hal-hal penting yang perlu diperhatikan sebelum tanda tangan
+- Akhiri dengan catatan: "Dokumen ini hanya dijelaskan untuk membantu pemahaman, bukan nasihat hukum resmi."
 
-                                Gunakan format yang rapi dengan heading dan poin-poin.`
+Gunakan format yang rapi dengan heading dan poin-poin.`
                             }
                         ]
                     }]
@@ -58,8 +62,18 @@ analyzeBtn.addEventListener('click', function() {
         );
 
         const data = await response.json();
+
+        if (!data.candidates) {
+            tampilkanHasil('Gagal menganalisis dokumen. Coba lagi beberapa saat.');
+            analyzeBtn.disabled = false;
+            analyzeBtn.textContent = 'Analisis Dokumen';
+            return;
+        }
+
         const hasilTeks = data.candidates[0].content.parts[0].text;
         tampilkanHasil(hasilTeks);
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = 'Analisis Dokumen';
     };
 })
 
@@ -71,4 +85,14 @@ function tampilkanHasil(teks) {
       ${marked.parse(teks)}
     </div>
   `;
+}
+
+function tampilkanLoading() {
+    const resultArea = document.getElementById('result-area');
+    resultArea.innerHTML = `
+        <h2>Hasil Analisis</h2>
+        <div class="result-content">
+            <p class="loading-text">⏳ sedang menganalisis dokumen...</p>
+        </div>
+    `;
 }

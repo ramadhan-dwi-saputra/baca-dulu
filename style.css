@@ -93,3 +93,13 @@ button:hover {
 .result-content strong {
     color: #111111;
 }
+
+.loading-text {
+    color: #666666;
+    font-style: italic;
+}
+
+button:disabled {
+    background-color: #9e9e9e;
+    cursor: not-allowed;
+}
