@@ -25,7 +25,7 @@ analyzeBtn.addEventListener('click', function() {
         const base64Data = reader.result.split(',')[1];
 
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
             {
                 method: 'POST',
                 headers: {
@@ -50,16 +50,17 @@ analyzeBtn.addEventListener('click', function() {
         );
 
         const data = await response.json();
-        tampilkanHasil('Ini adalah hasil analisis sementara untuk testing tampilan.');
+        const hasilTeks = data.candidates[0].content.parts[0].text;
+        tampilkanHasil(hasilTeks);
     };
 })
 
 function tampilkanHasil(teks) {
-    const resultArea = document.getElementById('result-area');
-    resultArea.innerHTML = `
-        <h2>Hasil Analisis</h2>
-        <div class="result-content">
-        <p>${teks}</p>
-        </div>
-    `;
+  const resultArea = document.getElementById('result-area');
+  resultArea.innerHTML = `
+    <h2>Hasil Analisis</h2>
+    <div class="result-content">
+      ${marked.parse(teks)}
+    </div>
+  `;
 }
