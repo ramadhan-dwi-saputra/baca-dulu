@@ -71,7 +71,10 @@ Jelaskan isi dokumen per pasal/bagian dengan bahasa sehari-hari. Singkat dan pad
 ⚠️ Dokumen ini hanya dijelaskan untuk membantu pemahaman, bukan nasihat hukum resmi.`
                             }
                         ]
-                    }]
+                    }],
+                    generationConfig: {
+                        temperature: 0
+                    }
                 })
             }
         );
