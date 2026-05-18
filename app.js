@@ -16,6 +16,11 @@ analyzeBtn.addEventListener('click', function() {
         return;
     }
 
+    if (file.size > 5 * 1024 *1024) {
+        alert('Ukuran file maksimal 5MB.');
+        return;
+    }
+
     tampilkanLoading();
     analyzeBtn.disabled = true;
     analyzeBtn.textContent = 'Menganalisis...';
