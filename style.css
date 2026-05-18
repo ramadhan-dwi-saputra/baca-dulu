@@ -137,3 +137,23 @@ button:disabled {
     border-top: 1px solid #e0e0e0;
     margin-top: 8px;
 }
+
+@media (max-width: 600px) {
+    header {
+        padding: 16px 20px;
+    }
+
+    main {
+        margin: 20px auto;
+        padding: 0 16px;
+    }
+
+    section {
+        padding: 20px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 10px 16px;
+    }
+}
