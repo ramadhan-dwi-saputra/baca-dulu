@@ -6,6 +6,10 @@ Aplikasi simplifikasi dokumen legal dan administratif Indonesia menggunakan AI.
 
 Baca Dulu membantu masyarakat Indonesia memahami dokumen seperti kontrak kerja, surat tilang, dokumen BPJS, dan surat dari instansi pemerintah - dalam bahasa sehari-hari yang mudah dipahami.
 
+## Live App
+
+🔗 [Baca Dulu](https://baca-dulu-244429600889.asia-southeast2.run.app)
+
 ## Fitur
 
 - Upload dokumen (PDF atau gambar)
