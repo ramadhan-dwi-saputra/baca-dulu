@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,29 +10,56 @@
 <body>
     
     <header>
-        <h1>Baca Dulu</h1>
-        <p>Pahami dokumen kamu dalam bahasa sehari-hari</p>
+        <div class="header-inner">
+            <div class="header-brand">
+                <span class="header-icon">📄</span>
+                <div>
+                    <h1>Baca Dulu</h1>
+                    <p class="header-tagline">Pahami dokumen kamu dalam bahasa sehari-hari</p>
+                </div>
+            </div>
+        </div>
     </header>
 
     <main>
 
-        <section id= "upload-area">
-            <h2>Upload Dokumen</h2>
-            <p id="upload-hint">Unggah dokumen seperti kontrak kerja, surat tilang, dokumen BPJS, perjanjian kredit, atau surat dari instansi pemerintah.</p>
-            <input type="file" id="file-input" accept="image/*,.pdf" />
-            <button id="analyze-btn">Analisis Dokumen</button>
-            <p id="file-name"></p>
-        </section>
+        <!-- Upload State -->
+        <div id= "upload-state">
+            <div class="hero">
+                <h2>Dokumen legal <span class="accent">bikin pusing?</span></h2>
+                <p>Upload kontrak, surat tilang, dokumen BPJS, atau surat pemerintah - AI kami jelaskan dalam bahasa sehari-hari</p>
+            </div>
         
-        <section id="result-area">
-            <h2>Hasil Analisis</h2>
-        </section>
+            <div id="upload-area">
+                <input type="file" id="file-input" accept="image/*,.pdf" hidden />
+                <div class="upload-icon">📁</div>
+                <p class="upload-label">Klik untuk pilih dokumen</p>
+                <p class="upload-hint">PDF atau Foto · Maksimal 5MB</p>
+            </div>
+            
+            <div id="file-info" class="hidden">
+                <span id="file-name-display"></span>
+                <button id="clear-file">✕</button>
+            </div>
 
-        <p id="disclaimer">
-            ⚠️ Hasil analisis ini hanya untuk membantu pemahaman, bukan nasihat hukum resmi. Konsultasikan dengan ahli hukum untuk keputusan penting.
-        </p>
+            <div id="error-message" class="hidden"></div>
+
+            <button id="analyze-btn" disabled>Analisis Dokumen</button>
+
+            <p class="upload-disclaimer">⚠️ Dokumen tidak disimpan di server. Aman & rahasia.</p>
+        </div>
+        
+        <!-- Result State -->
+        <div id="result-state" class="hidden">
+            <button id="reset-btn">← Analisis Dokumen Lain</button>
+            <div id="result-content"></div>
+        </div>
 
     </main>
+
+    <footer>
+      <p>⚠️ Hasil analisis hanya untuk membantu pemahaman, bukan nasihat hukum resmi. Konsultasikan dengan ahli hukum untuk keputusan penting.</p>
+    </footer>
 
     <script src="app.js"></script>
 </body>
