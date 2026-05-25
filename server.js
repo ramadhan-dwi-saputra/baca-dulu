@@ -1,11 +1,12 @@
 import express from 'express';
 import multer from 'multer';
 import fetch from 'node-fetch';
+import mammoth from 'mammoth';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const app = express();
-const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } });
+const upload = multer({ limits: { fileSize: 20 * 1024 * 1024 } });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,26 +26,13 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
         return res.status(400).json({ error: 'Tidak ada file yang dikirim.' });
     }
 
-    const base64Data = req.file.buffer.toString('base64');
     const mime_type = req.file.mimetype;
+    const isDocx = mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || req.file.originalname?.toLowerCase().endsWith('.docx'); 
 
-    try {
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents:[{
-                        parts:[
-                            {
-                                inline_data: {
-                                    mime_type: mime_type,
-                                    data: base64Data
-                                }
-                            },
-                            {
-                                text: `Kamu adalah asisten yang membantu orang Indonesia memahami dokumen legal dan administratif.
+    // Build parts array untuk Gemini - berbeda antara DOCX vs PDF/image
+    let parts;
+
+    const PROMPT_TEXT = `Kamu adalah asisten yang membantu orang Indonesia memahami dokumen legal dan administratif.
 
 Analisis dokumen ini dan berikan output dalam format berikut (gunakan format ini persis):
 
@@ -62,13 +50,39 @@ Tuliskan 5 poin paling penting yang perlu diketahui user sebelum tanda tangan. S
 Jelaskan isi dokumen per pasal/bagian dengan bahasa sehari-hari. Singkat dan padat.
 
 ---
-⚠️ Dokumen ini hanya dijelaskan untuk membantu pemahaman, bukan nasihat hukum resmi.`
-                            }
-                        ]
-                    }],
-                    generationConfig: {
-                        temperature: 0
-                    }
+⚠️ Dokumen ini hanya dijelaskan untuk membantu pemahaman, bukan nasihat hukum resmi.`;
+
+    try {
+        if (isDocx) {
+            // Ekstrak teks dari DOCX pakai mammoth
+            const { value: extractedText } = await mammoth.extractRawText({ buffer: req.file.buffer });
+
+            if (!extractedText || extractedText.trim().length === 0) {
+                return res.status(422).json({ error: 'Dokumen DOCX tidak bisa dibaca. Pastikan file tidak kosong atau terproteksi.' });
+            }
+
+            // Kirim sebagai teks biasa ke Gemini (tidak perlu inline_data)
+            parts = [
+                { text: `Berikut isi dokumen DOCX yang perlu dianalisis:\n\n${extractedText}` },
+                { text: PROMPT_TEXT }
+            ];
+        } else {
+            // PDF / image -> kirim sebagai inline_data seperti semula
+            const base64Data = req.file.buffer.toString('base64');
+            parts = [
+                { inline_data: { mime_type, data: base64Data } },
+                { text: PROMPT_TEXT}
+            ];
+        }
+
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents:[{ parts }],
+                    generationConfig: { temperature: 0 }
                 })
             }
         );

@@ -17,12 +17,34 @@ uploadArea.addEventListener('click', function () {
 });
 
 // ===== FILE INPUT CHANGE ======
+const ALLOWED_TYPES = [
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/heic',
+    'image/heif',
+];
+
 fileInput.addEventListener('change', function () {
     const file = fileInput.files[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-        showError('Ukuran file maksimal 5MB.');
+    // Cek tipe file - fallback ke ekstensi kalau browser tidak detect MIME dengan benar
+    const isDocx = file.name.toLowerCase().endsWith('.docx');
+    const isAllowed = ALLOWED_TYPES.includes(file.type) || isDocx;
+
+    if (!isAllowed) {
+        showError('Format tidak didukung. Gunakan PDF, DOCX, atau foto (JPG, PNG, WebP).');
+        fileInput.value = '';
+        return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+        showError('Ukuran file maksimal 20MB.');
+        fileInput.value = '';
         return;
     }
     
