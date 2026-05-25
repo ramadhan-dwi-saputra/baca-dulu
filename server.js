@@ -1,4 +1,3 @@
-import { log } from 'console';
 import express from 'express';
 import multer from 'multer';
 import fetch from 'node-fetch';
@@ -11,11 +10,11 @@ const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve static files dari folder punlic/
+// Serve static files dari folder public/
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ===== PROXY ENDPOINT =====
-app.post('api/analyze', upload.single('file'), async (req, res) => {
+app.post('/api/analyze', upload.single('file'), async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
 
     if(!apiKey) {
@@ -36,7 +35,7 @@ app.post('api/analyze', upload.single('file'), async (req, res) => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contens:[{
+                    contents:[{
                         parts:[
                             {
                                 inline_data: {
@@ -80,7 +79,7 @@ Jelaskan isi dokumen per pasal/bagian dengan bahasa sehari-hari. Singkat dan pad
             return res.status(502).json({ error: 'Gagal mendapat respons dari Gemini' });
         }
 
-        const hasilTeks = data.candidates[0].contens.parts[0].text;
+        const hasilTeks = data.candidates[0].content.parts[0].text;
         res.json({ result: hasilTeks });
 
     } catch (err) {
