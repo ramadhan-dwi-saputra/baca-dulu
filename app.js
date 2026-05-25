@@ -106,7 +106,7 @@ Jelaskan isi dokumen per pasal/bagian dengan bahasa sehari-hari. Singkat dan pad
             const hasilTeks = data.candidates[0].content.parts[0].text;
             tampilkanHasil(hasilTeks);
 
-        }   catch (err) {
+        } catch (err) {
             showError('Terjadi kesalahan koneksi. Periksa internet dan coba lagi.');
         } 
     };
@@ -155,9 +155,10 @@ function showLoading() {
     resultState.classList.remove('hidden');
     resultContent.innerHTML = `
         <div class="loading-container">
-                <p class="loading-text">Sedang menganalisis dokumen...</p>
+        <div class="loading-spinner"></div>
+            <p class="loading-text">Sedang menganalisis dokumen...</p>
         </div>
-        `;
+    `;
 }
 
 function resetAnalyzebtn() {
@@ -174,11 +175,11 @@ function tampilkanHasil(teks) {
     const sections = parseHasil(teks);
 
     resultContent.innerHTML = `
-        ${sections.redflag ? `
+        ${sections.redflag.length > 0 ? `
         <div class="result-card card-redflag">
             <div class="card-header">
                 <span class="card-icon">🔴</span>
-                <h3>Perlu Diperhatkan</h3>
+                <h3>Perlu Diperhatikan</h3>
             </div>
             <ul class="redflag-list">
                 ${sections.redflag.map((item, i) => `
@@ -190,40 +191,77 @@ function tampilkanHasil(teks) {
             </ul>
         </div>` : ''}
 
-        <div class="result-card">
-            <div class="card-header">
+        <div class="result-grid">
+          <div class="left-column">
+            <div class="result-card">
+              <div class="card-header">
                 <span class="card-icon">📋</span>
                 <h3>Ringkasan Dokumen</h3>
+              </div>
+              <p class="summary-text">${sections.ringkasan}</p>
             </div>
-            <p class="summary-text">${sections.ringkasan}</p>
-        </div>
 
-        <div class="result-card">
-            <div class="card-header">
+            <div class="result-card">
+              <div class="card-header">
                 <span class="card-icon">📌</span>
                 <h3>Poin Penting</h3>
-            </div>
-            <ul class="keypoints-list">
+              </div>
+              <ul class="keypoints-list">
                 ${sections.poinPenting.map((item, i) => `
-                    <li>
-                        <span class="keypoint-number">${i + 1}</span>
-                        ${item}
-                    </li>
+                  <li>
+                    <span class="keypoint-number">${i + 1}</span>
+                    ${item}
+                  </li>
                 `).join('')}
-            </ul>
-        </div>
+              </ul>
+            </div>
+          </div>
 
-        ${sections.detail.length > 0 ? `
-        <div class="accordion-title">
-            <span>📖</span> Detail Per Bagian
+          <div class="right-column">
+            ${sections.detail.length > 0 ? `
+            <div class="result-card detail-card">
+              <div class="card-header">
+                <span class="card-icon">📖</span>
+                <h3>Detail Per Bagian</h3>
+              </div>
+              <div class="accordion-list">
+                ${sections.detail.map((item, i) => `
+                  <div class="accordion-item">
+                    <div class="accordion-summary" data-index="${i}">
+                      <span>${item.judul}</span>
+                      <span class="accordion-toggle">+</span>
+                    </div>
+                    <div class="accordion-body">${item.isi}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>` : ''}
+          </div>
         </div>
-        ${sections.detail.map(item => `
-            <details class="accordion-item">
-                <summary>${item.judul}</summary>
-                <div class="accordion-body">${item.isi}</div>
-            </details>
-        `).join('')}` : ''}
     `;
+
+    initAccordion();
+}
+
+function initAccordion() {
+    const summaries = resultContent.querySelectorAll('.accordion-summary');
+    summaries.forEach(function(summary) {
+        summary.addEventListener('click', function() {
+            const body = this.nextElementSibling;
+            const toggle = this.querySelector('.accordion-toggle');
+            const isOpen = body.classList.contains('open');
+
+            if (isOpen) {
+                body.classList.remove('open');
+                toggle.textContent = '+';
+                this.classList.remove('open');
+            } else {
+                body.classList.add('open');
+                toggle.textContent = '-';
+                this.classList.add('open');
+            }
+        });
+    });
 }
 
 function parseHasil(teks) {
@@ -234,38 +272,80 @@ function parseHasil(teks) {
         detail: []
     };
 
-    const lines = teks.split('\n');
-    let currentSection = '';
+    // Pisahkan teks jadi sections berdasarkan heading ##
+    const sectionRegex = /##[^#][^\n]*/g;
+    const sectionHeaders = [...teks.matchAll(sectionRegex)].map(m => ({
+        title: m[0],
+        index: m.index
+    }));
 
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-
-        if (line.includes('Perlu Diperhatikan')) {
-            currentSection = 'redflag';
-        } else if (line.includes('Ringkasan Dokumen')) {
-            currentSection = 'ringkasan';
-        } else if (line.includes('Poin Penting')) {
-            currentSection = 'poinpenting';
-        } else if (line.includes('Detail Per Bagian')) {
-            currentSection = 'detail';
-        } else if (line === '' || line.startsWith('---') || line.startsWith('⚠️')) {
-            continue;
-        } else if (currentSection === 'redflag' && (line.startsWith('-') || line.startsWith('*') || line.match(/^\d+\./))) {
-            result.redflag.push(stripMarkdown(line.replace(/^[-*]\s*/, '').replace(/^\d+\.\s*/, '')));
-        } else if (currentSection === 'ringkasan' && line != '') {
-            result.ringkasan += (result.ringkasan ? '' : '') + line;
-        } else if (currentSection === 'poinpenting' && (line.startsWith('-') || line.startsWith('*') || line.match(/^\d+\./))) {
-            result.poinPenting.push(stripMarkdown(line.replace(/^[-*]\s*/, '').replace(/^\d+\.\s*/, '')));
-        } else if (currentSection === 'detail' && line != '') {
-            if (line.startsWith('**') || line.startsWith('###') || line.startsWith('##') || line.startsWith('Pasal') || line.startsWith('Bagian')) {
-                const judul = line.replace(/\*\*/g, '').replace(/^#+\s*/, '');
-                result.detail.push({ judul, isi: '' });
-            } else if (result.detail.length > 0) {
-                const last = result.detail[result.detail.length - 1];
-                last.isi += (last.isi ? ' ': '') + stripMarkdown(line.replace(/^[-*]\s*/, ''));
-            }
-        }
+    function getSectionText(keyword) {
+        const header = sectionHeaders.find(h => h.title.includes(keyword));
+        if (!header) return '';
+        const start = header.index + header.title.length;
+        const nextHeader = sectionHeaders.find(h => h.index > header.index);
+        const end = nextHeader ? nextHeader.index : teks.length;
+        return teks.slice(start, end).trim();
     }
+
+    // ===== REDFLAG =====
+    const redflagText = getSectionText('Perlu Diperhatikan');
+    redflagText.split('\n').forEach(line => {
+        line = line.trim();
+        if (line.match(/^[-*]\s+/) || line.match(/^\d+\.\s+/)) {
+            const clean = stripMarkdown(line.replace(/^[-*\d.]+\s*/, ''));
+            if (clean) result.redflag.push(clean);
+        }
+    });
+
+    // ===== RINGKASAN =====
+    const ringkasanText = getSectionText('Ringkasan Dokumen');
+    result.ringkasan = stripMarkdown(ringkasanText.split('\n')
+        .map(l => l.trim())
+        .filter(l => l && !l.startsWith('#'))
+        .join(' '));
+
+    // ===== POIN PENTING =====
+    const poinText = getSectionText('Poin Penting');
+    poinText.split('\n').forEach(line => {
+        line = line.trim();
+        if (line.match(/^[-*]\s+/) || line.match(/^\d+\.\s+/)) {
+            const clean = stripMarkdown(line.replace(/^[-*\d.]+\s*/, ''));
+            if (clean) result.poinPenting.push(clean);
+        }
+    });
+
+    // ===== DETAIL PER BAGIAN =====
+    const detailText = getSectionText('Detail Per Bagian');
+    
+    // Gemini format: "**Judul:** isi" atau "**Judul**\nisi" atau "* **Judul:** isi"
+    // Split berdasarkan pola **...** yang muncul di awal baris (judul baru)
+    const detailLines = detailText.split('\n');
+    
+    detailLines.forEach(line => {
+        line = line.trim();
+        if (!line || line.startsWith('---') || line.startsWith('⚠️')) return;
+
+        // Deteksi apakah baris ini adalah judul baru
+        // Pattern: **Teks:** atau **Teks** di awal baris (dengan/tanpa bullet * atau nomor)
+        const judulMatch = line.match(/^(?:[*-]\s*)?\*\*(.+?)\*\*[:\s]*(.*)/);
+        const pasalMatch = line.match(/^(?:[*-]\s*)?((?:Pasal|Bagian|ANTARA|MENIMBANG|Pendahuluan|Penutup)\s*\d*[:\s]*.{0,60})/i);
+
+        if (judulMatch) {
+            const judul = judulMatch[1].replace(/:/g, '').trim();
+            const isiInline = judulMatch[2].trim();
+            result.detail.push({ judul, isi: stripMarkdown(isiInline) });
+        } else if (pasalMatch && result.detail.length === 0) {
+            // Fallback untuk format tanpa **bold**
+            const judul = pasalMatch[1].trim();
+            result.detail.push({ judul, isi: '' });
+        } else if (result.detail.length > 0) {
+            // Isi dari baris lanjutan
+            const last = result.detail[result.detail.length - 1];
+            const clean = stripMarkdown(line.replace(/^[-*]\s*/, ''));
+            if (clean) last.isi += (last.isi ? ' ' : '') + clean;
+        }
+    });
 
     return result; 
 }
@@ -274,5 +354,5 @@ function stripMarkdown(teks) {
   return teks
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
-    .replace(/`(.*?)`/g, '$1');
+    .replace(/^#+\s*/gm, '');
 }

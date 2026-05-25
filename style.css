@@ -282,6 +282,41 @@ button#analyze-btn:disabled {
     color: #dc2626;
 }
 
+.result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: start;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.right-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-card {
+    height: 100%;
+}
+
+.accordion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+@media (max-width: 600px) {
+    .result-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Summary Card */
 .summary-text {
     font-size: 15px;
@@ -325,50 +360,43 @@ button#analyze-btn:disabled {
 }
 
 /* Accordion - Detail per Bagian */
-.accordion-tittle {
-    font-size: 16px;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
 
-details.accordion-item {
+.accordion-item {
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     margin-bottom: 8px;
-    overflow: hidden;
 }
 
-details.accordion-item summary {
+.accordion-summary {
     padding: 14px 16px;
     font-weight: 600;
     font-size: 14px;
     color: #1e293b;
     cursor: pointer;
-    list-style: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
     user-select: none;
+    gap: 8px;
 }
 
-details.accordion-item summary:hover {
+.accordion-summary:hover {
     background: #f8fafc;
+    border-radius: 12px;
 }
 
-details.accordion-item summary::after {
-    content: '+';
-    font-size: 16px;
+.accordion-summary.open {
+    border-radius: 12px 12px 0 0;
+}
+
+.accordion-toggle {
+    flex-shrink: 0;
+    font-size: 18px;
     color: #94a3b8;
-    transition: transform o.2s;
-}
-
-details.accordion-item[open] summary::after {
-    content: '-';
+    font-weight: 400;
+    line-height: 1;
+    transition: transform 0.2s ease;
 }
 
 .accordion-body {
@@ -377,6 +405,11 @@ details.accordion-item[open] summary::after {
     color: #475569;
     line-height: 1.7;
     border-top: 1px solid #f1f5f9;
+    display: none !important;
+}
+
+.accordion-body.open {
+    display: block !important;
 }
 
 /* Loading State */
@@ -386,9 +419,10 @@ details.accordion-item[open] summary::after {
 }
 
 .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #dbeafe;
+    width: 44px;
+    height: 44px;
+    border: 4px solid #dbeafe;
+    border-top-color: #1e40af;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin: 0 auto 16px;
