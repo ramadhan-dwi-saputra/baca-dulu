@@ -34,7 +34,12 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
 
     const PROMPT_TEXT = `Kamu adalah asisten yang membantu orang Indonesia memahami dokumen legal dan administratif.
 
-Analisis dokumen ini dan berikan output dalam format berikut (gunakan format ini persis):
+Sebelum menganalisis, tentukan dulu apakah dokumen ini termasuk dokumen resmi, legal, atau administratif (contoh: kontrak, surat resmi, tagihan, polis asuransi, akta, slip gaji, dokumen pemerintah, dll).
+
+Jika BUKAN dokumen resmi/legal/administratif (contoh: tugas kuliah, materi pelajaran, artikel, cerita, resep, kode program, dll), balas HANYA dengan kata ini tanpa tambahan apapun:
+BUKAN_DOKUMEN_LEGAL
+
+Jika YA, lanjutkan analisis dokumen ini dan berikan output dalam format berikut (gunakan format ini persis):
 
 ## 🔴 Perlu Diperhatikan
 Tuliskan HANYA jika ada klausa yang tidak umum, berpotensi merugikan, atau perlu didiskusikan sebelum tanda tangan. Jika tidak ada, tulis "Tidak ditemukan klausa yang perlu diwaspadai."
@@ -94,6 +99,13 @@ Jelaskan isi dokumen per pasal/bagian dengan bahasa sehari-hari. Singkat dan pad
         }
 
         const hasilTeks = data.candidates[0].content.parts[0].text;
+
+        if (hasilTeks.trim().startsWith('BUKAN_DOKUMEN_LEGAL')) {
+            return res.status(422).json({ 
+                error: 'Dokumen tidak dikenali sebagai dokumen legal atau resmi. Pastikan file yang diupload adalah dokumen formal seperti kontrak, surat resmi, atau tagihan.' 
+            });
+        }
+
         res.json({ result: hasilTeks });
 
     } catch (err) {
