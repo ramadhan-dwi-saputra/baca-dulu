@@ -91,5 +91,5 @@ Jelaskan isi dokumen per pasal/bagian dengan bahasa sehari-hari. Singkat dan pad
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-    console.log('Server berjalan di port ${PORT}');    
+    console.log(`Server berjalan di port ${PORT}`);    
 })
