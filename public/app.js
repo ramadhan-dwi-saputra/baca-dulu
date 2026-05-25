@@ -11,8 +11,6 @@ const resultState = document.getElementById('result-state');
 const resultContent = document.getElementById('result-content');
 const resetBtn = document.getElementById('reset-btn');
 
-const GEMINI_API_KEY = 'ISI_API_KEY';
-
 // ===== UPLOAD AREA CLICK =====
 uploadArea.addEventListener('click', function () {
   fileInput.click();
@@ -44,72 +42,29 @@ analyzeBtn.addEventListener('click', async function () {
 
     showLoading();
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
+    const formData = new FormData();
+    formData.append('file', file);
 
-    reader.onload = async function () {
-        const base64Data = reader.result.split(',')[1];
+    try {
+        const response = await fetch('/api/analyze', {
+            method: 'POST',
+            body: formData
+        });
 
-        try {
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                {
-                                    inline_data: {
-                                        mime_type: file.type,
-                                        data: base64Data
-                                    }
-                                },
-                                {
-                                    text: `Kamu adalah asisten yang membantu orang Indonesia memahami dokumen legal dan administratif.
+        const data = await response.json();
 
-Analisis dokumen ini dan berikan output dalam format berikut (gunakan format ini persis):
+        if (!response.ok) {
+            showError(data.error || 'Gagal menganalisis dokumen. Coba lagi.');
+            resetAnalyzebtn();
+            return;
+        }
+            
+        tampilkanHasil(data.result);
 
-## 🔴 Perlu Diperhatikan
-Tuliskan HANYA jika ada klausa yang tidak umum, berpotensi merugikan, atau perlu didiskusikan sebelum tanda tangan. Jika tidak ada, tulis "Tidak ditemukan klausa yang perlu diwaspadai."
-Maksimal 3 poin singkat.
-
-## 📋 Ringkasan Dokumen
-Jelaskan dalam 3-5 kalimat singkat: dokumen ini apa, antara siapa, dan apa intinya.
-
-## 📌 Poin Penting
-Tuliskan 5 poin paling penting yang perlu diketahui user sebelum tanda tangan. Singkat, maksimal 1-2 kalimat per poin.
-
-## 📖 Detail Per Bagian
-Jelaskan isi dokumen per pasal/bagian dengan bahasa sehari-hari. Singkat dan padat.
-
----
-⚠️ Dokumen ini hanya dijelaskan untuk membantu pemahaman, bukan nasihat hukum resmi.`
-                                }
-                            ]
-                        }],
-                        generationConfig: {
-                            temperature: 0
-                        }
-                    })
-                }
-            );
-
-            const data = await response.json();
-
-            if (!data.candidates) {
-                showError('Gagal menganalisis dokumen. Coba lagi beberapa saat.');
-                resetAnalyzebtn();
-                return;
-            }
-
-            const hasilTeks = data.candidates[0].content.parts[0].text;
-            tampilkanHasil(hasilTeks);
-
-        } catch (err) {
-            showError('Terjadi kesalahan koneksi. Periksa internet dan coba lagi.');
-        } 
-    };
+    } catch (err) {
+        showError('Terjadi kesalahan koneksi. Periksa internet dan coba lagi.');
+        resetAnalyzebtn();
+    }
 });
 
 // ====== RESET BUTTON =====
