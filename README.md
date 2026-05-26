@@ -53,17 +53,27 @@ Buka `http://localhost:8080` di browser.
 
 ## Deployment (Google Cloud Run)
 
-```bash
-# Build dan deploy
-gcloud run deploy baca-dulu \
-  --source . \
-  --region asia-southeast2 \
-  --allow-unauthenticated
+**Prasyarat:**
+- Google Cloud account dengan billing aktif
+- gcloud CLI terinstall dan sudah login (`gcloud auth login`)
+  > *Catatan pengguna Windows: Jika gcloud diblokir di VS Code, jalankan `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` di PowerShell terlebih dahulu.*
+- Project GCP sudah dibuat dan di-set sebagai aktif (`gcloud config set project YOUR_PROJECT_ID`)
+- Cloud Run API sudah diaktifkan (`gcloud services enable run.googleapis.com`)
 
-# Set environment variable di Cloud Console:
-# GEMINI_API_KEY = your_key_here
+Untuk setup GCP dari nol, ikuti [panduan resmi Google Cloud Run](https://cloud.google.com/run/docs/quickstarts/build-and-deploy/deploy-nodejs-service).
+
+**Deploy:**
+```bash
+gcloud run deploy baca-dulu --source . --project=YOUR_PROJECT_ID --region asia-southeast2 --allow-unauthenticated
 ```
 
+**Set environment variable setelah deploy:**
+1. Buka Cloud Run di Google Cloud Console
+2. Pilih service `baca-dulu` → Edit & Deploy New Revision
+3. Di bagian Variables & Secrets, tambahkan:
+   - Name: `GEMINI_API_KEY`
+   - Value: `your_actual_gemini_api_key`
+   
 ## Struktur Project
 
 ```
