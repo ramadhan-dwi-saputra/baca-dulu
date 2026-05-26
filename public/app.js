@@ -169,6 +169,16 @@ function tampilkanHasil(teks) {
             </ul>
         </div>` : ''}
 
+        ${sections.infoKilat.length > 0 ? `
+        <div class="info-kilat-grid">
+            ${sections.infoKilat.map(item => `
+                <div class="info-kilat-card">
+                    <span class="info-kilat-label">${item.label}</span>
+                    <span class="info-kilat-value">${item.value}</span>
+                </div>
+            `).join('')}
+        </div>` : ''}
+
         <div class="result-grid">
           <div class="left-column">
             <div class="result-card">
@@ -247,6 +257,7 @@ function parseHasil(teks) {
         riskFlag: [],
         ringkasan: '',
         poinPenting: [],
+        infoKilat: [],
         detail: []
     };
 
@@ -328,6 +339,28 @@ function parseHasil(teks) {
             if (clean) last.isi += (last.isi ? ' ' : '') + clean;
         }
     });
+
+    // ===== INFORMASI KILAT =====
+    const infoKilatText = getSectionText('Informasi Kilat');
+    if (infoKilatText) {
+        const VALID_KEYS = ['JENIS','PIHAK_1','PIHAK_2','NILAI','DURASI','POSISI','TANGGAL','LOKASI'];
+        const KEY_LABELS = {
+            JENIS: 'Jenis', PIHAK_1: 'Pihak 1', PIHAK_2: 'Pihak 2',
+            NILAI: 'Nilai', DURASI: 'Durasi', POSISI: 'Posisi',
+            TANGGAL: 'Tanggal', LOKASI: 'Lokasi'
+        };
+        infoKilatText.split('\n').forEach(line => {
+            line = line.trim();
+            const match = line.match(/^([A-Z_1-9]+):\s*(.+)/);
+            if (match && VALID_KEYS.includes(match[1])) {
+                result.infoKilat.push({
+                    key: match[1],
+                    label: KEY_LABELS[match[1]] || match[1],
+                    value: stripMarkdown(match[2].trim())
+                });
+            }
+        });
+    }
 
     return result; 
 }

@@ -52,6 +52,19 @@ Jelaskan dalam 3-5 kalimat singkat: dokumen ini apa, antara siapa, dan apa intin
 ## 📌 Poin Penting
 Tuliskan 7 poin paling penting yang perlu diketahui user sebelum tanda tangan. Singkat, maksimal 1-2 kalimat per poin.
 
+## 📊 Informasi Kilat
+OPSIONAL — Sertakan section ini HANYA jika dokumen mengandung data terstruktur yang relevan (contoh: kontrak dengan nilai, perjanjian antar pihak, slip gaji, tagihan, asuransi). Jika tidak ada data yang cocok, SKIP section ini sepenuhnya (jangan tulis heading-nya).
+Jika disertakan, tulis data sebagai pasangan KEY: VALUE, satu per baris. Gunakan key dari daftar berikut yang relevan saja:
+JENIS: (jenis dokumen, contoh: Kontrak Kerja, Polis Asuransi)
+PIHAK_1: (nama pihak pertama)
+PIHAK_2: (nama pihak kedua)
+NILAI: (nilai uang/nominal, contoh: Rp 50.000.000)
+DURASI: (masa berlaku, contoh: 12 bulan, 1 tahun)
+POSISI: (jabatan/posisi jika ada)
+TANGGAL: (tanggal efektif atau penandatanganan)
+LOKASI: (tempat/kota jika ada)
+Hanya tulis key yang benar-benar ada nilainya dalam dokumen. Jangan mengarang nilai.
+
 ## 📖 Detail Per Bagian
 Jelaskan isi dokumen per pasal/bagian dengan bahasa sehari-hari. Singkat dan padat.
 

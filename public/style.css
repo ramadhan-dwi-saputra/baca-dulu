@@ -226,6 +226,44 @@ button#analyze-btn:disabled {
     color: #1d3799;
 }
 
+/* INFORMASI KILAT */
+.info-kilat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.info-kilat-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.info-kilat-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.info-kilat-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
 /* ===== RESULT CARDS ===== */
 .result-card {
     background: #ffffff;
@@ -252,7 +290,7 @@ button#analyze-btn:disabled {
     font-size: 20px;
 }
 
-/* Red Flag Card */
+/* Risk Flag Card */
 .card-risk-flag {
     background: #fff5f5;
     border-color: #fecaca;
