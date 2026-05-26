@@ -252,7 +252,7 @@ button#analyze-btn:disabled {
     font-size: 20px;
 }
 
-/* Risk Flag Card */
+/* Red Flag Card */
 .card-risk-flag {
     background: #fff5f5;
     border-color: #fecaca;
@@ -276,6 +276,39 @@ button#analyze-btn:disabled {
     font-size: 14px;
     color: #7f1d1d;
     line-height: 1.6;
+    flex-wrap: wrap;
+}
+
+/* Severity Badges */
+.risk-flag-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    line-height: 1.6;
+}
+
+.risk-flag-badge.tinggi {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+}
+
+.risk-flag-badge.sedang {
+    background: #fef9c3;
+    color: #854d0e;
+    border: 1px solid #fde047;
+}
+
+.risk-flag-badge.info {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
 }
 
 .risk-flag-number {
