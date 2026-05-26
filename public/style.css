@@ -252,24 +252,24 @@ button#analyze-btn:disabled {
     font-size: 20px;
 }
 
-/* Red Flag Card */
-.card-redflag {
+/* Risk Flag Card */
+.card-risk-flag {
     background: #fff5f5;
     border-color: #fecaca;
 }
 
-.card-redflag .card-header h3 {
+.card-risk-flag .card-header h3 {
     color: #dc2626;
 }
 
-.redflag-list {
+.risk-flag-list {
     list-style: none;
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.redflag-list li {
+.risk-flag-list li {
     display: flex;
     gap: 12px;
     align-items: flex-start;
@@ -278,7 +278,7 @@ button#analyze-btn:disabled {
     line-height: 1.6;
 }
 
-.redflag-number {
+.risk-flag-number {
     flex-shrink: 0;
     width: 24px;
     height: 24px;

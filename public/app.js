@@ -152,16 +152,16 @@ function tampilkanHasil(teks) {
     const sections = parseHasil(teks);
 
     resultContent.innerHTML = `
-        ${sections.redflag.length > 0 ? `
-        <div class="result-card card-redflag">
+        ${sections.riskFlag.length > 0 ? `
+        <div class="result-card card-risk-flag">
             <div class="card-header">
                 <span class="card-icon">🔴</span>
                 <h3>Perlu Diperhatikan</h3>
             </div>
-            <ul class="redflag-list">
-                ${sections.redflag.map((item, i) => `
+            <ul class="risk-flag-list">
+                ${sections.riskFlag.map((item, i) => `
                     <li>
-                        <span class="redflag-number">${i + 1}</span>
+                        <span class="risk-flag-number">${i + 1}</span>
                         ${item}
                     </li>
                 `).join('')}
@@ -243,7 +243,7 @@ function initAccordion() {
 
 function parseHasil(teks) {
     const result = {
-        redflag: [],
+        riskFlag: [],
         ringkasan: '',
         poinPenting: [],
         detail: []
@@ -265,13 +265,13 @@ function parseHasil(teks) {
         return teks.slice(start, end).trim();
     }
 
-    // ===== REDFLAG =====
-    const redflagText = getSectionText('Perlu Diperhatikan');
-    redflagText.split('\n').forEach(line => {
+    // ===== RISK FLAG =====
+    const riskFlagText = getSectionText('Perlu Diperhatikan');
+    riskFlagText.split('\n').forEach(line => {
         line = line.trim();
         if (line.match(/^[-*]\s+/) || line.match(/^\d+\.\s+/)) {
             const clean = stripMarkdown(line.replace(/^[-*\d.]+\s*/, ''));
-            if (clean) result.redflag.push(clean);
+            if (clean) result.riskFlag.push(clean);
         }
     });
 
