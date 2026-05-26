@@ -162,7 +162,8 @@ function tampilkanHasil(teks) {
                 ${sections.riskFlag.map((item, i) => `
                     <li>
                         <span class="risk-flag-number">${i + 1}</span>
-                        ${item}
+                        ${item.severity ? `<span class="risk-flag-badge ${item.severity}">${item.severity === 'tinggi' ? 'Tinggi' : item.severity === 'sedang' ? 'Sedang' : 'Info'}</span>` : ''}
+                        <span>${item.teks}</span>
                     </li>
                 `).join('')}
             </ul>
@@ -270,8 +271,12 @@ function parseHasil(teks) {
     riskFlagText.split('\n').forEach(line => {
         line = line.trim();
         if (line.match(/^[-*]\s+/) || line.match(/^\d+\.\s+/)) {
-            const clean = stripMarkdown(line.replace(/^[-*\d.]+\s*/, ''));
-            if (clean) result.riskFlag.push(clean);
+            const raw = line.replace(/^[-*\d.]+\s*/, '').trim();
+            // Ekstrak severity tag [TINGGI] / [SEDANG] / [INFO]
+            const severityMatch = raw.match(/^\[(TINGGI|SEDANG|INFO)\]\s*/i);
+            const severity = severityMatch ? severityMatch[1].toLowerCase() : null;
+            const teks = stripMarkdown(severityMatch ? raw.slice(severityMatch[0].length) : raw);
+            if (teks) result.riskFlag.push({ severity, teks });
         }
     });
 

@@ -43,13 +43,14 @@ Jika YA, lanjutkan analisis dokumen ini dan berikan output dalam format berikut 
 
 ## 🔴 Perlu Diperhatikan
 Tuliskan HANYA jika ada klausa yang tidak umum, berpotensi merugikan, atau perlu didiskusikan sebelum tanda tangan. Jika tidak ada, tulis "Tidak ditemukan klausa yang perlu diwaspadai."
-Maksimal 3 poin singkat.
+Maksimal 5 poin singkat. Awali setiap poin dengan tag tingkat risiko: [TINGGI] untuk klausa berbahaya/merugikan signifikan, [SEDANG] untuk klausa yang perlu diperhatikan, [INFO] untuk informasi penting namun tidak berbahaya.
+Format setiap poin: - [TINGGI] Penjelasan klausa...
 
 ## 📋 Ringkasan Dokumen
 Jelaskan dalam 3-5 kalimat singkat: dokumen ini apa, antara siapa, dan apa intinya.
 
 ## 📌 Poin Penting
-Tuliskan 5 poin paling penting yang perlu diketahui user sebelum tanda tangan. Singkat, maksimal 1-2 kalimat per poin.
+Tuliskan 7 poin paling penting yang perlu diketahui user sebelum tanda tangan. Singkat, maksimal 1-2 kalimat per poin.
 
 ## 📖 Detail Per Bagian
 Jelaskan isi dokumen per pasal/bagian dengan bahasa sehari-hari. Singkat dan padat.
