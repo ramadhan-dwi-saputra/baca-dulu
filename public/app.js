@@ -349,13 +349,20 @@ function parseHasil(teks) {
             NILAI: 'Nilai', DURASI: 'Durasi', POSISI: 'Posisi',
             TANGGAL: 'Tanggal', LOKASI: 'Lokasi'
         };
+        const KEY_EMOJIS = {
+            JENIS: '📄', PIHAK_1: '🏢', PIHAK_2: '👤',
+            NILAI: '💰', DURASI: '📅', POSISI: '💼',
+            TANGGAL: '🗓️', LOKASI: '📍'
+        }
         infoKilatText.split('\n').forEach(line => {
             line = line.trim();
             const match = line.match(/^([A-Z_1-9]+):\s*(.+)/);
             if (match && VALID_KEYS.includes(match[1])) {
+                const key = match[1];
+                const emoji = KEY_EMOJIS[key] || '';
                 result.infoKilat.push({
-                    key: match[1],
-                    label: KEY_LABELS[match[1]] || match[1],
+                    key,
+                    label: (emoji ? emoji + ' ' : '') + (KEY_LABELS[key] || key),
                     value: stripMarkdown(match[2].trim())
                 });
             }
