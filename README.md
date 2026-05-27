@@ -17,6 +17,8 @@ Baca Dulu membantu masyarakat Indonesia memahami isi dokumen — mulai dari kont
 - **Deteksi Perlu Diperhatikan** — Klausa berisiko atau tidak lazim ditandai otomatis
 - **Privacy-first** — Dokumen tidak disimpan di server setelah dianalisis
 - **Guardrail** — Dokumen non-formal/non-legal diblokir di level server
+- **Severity badge** — Risiko ditandai dengan level Tinggi, Sedang, atau Info
+- **Informasi Kilat** — Data terstruktur dokumen (pihak, nilai, durasi, dll) ditampilkan dalam card grid
 
 ## Tech Stack
 
@@ -42,11 +44,10 @@ npm install
 
 # Setup environment variable
 cp .env.example .env
-# Edit .env dan isi GEMINI_API_KEY=your_key_here
+# Buka .env dan isi GEMINI_API_KEY=your_key_here
 
 # Jalankan server
 npm start
-# atau: node server.js
 ```
 
 Buka `http://localhost:8080` di browser.
@@ -85,6 +86,7 @@ baca-dulu/
 ├── server.js           # Express backend + Gemini proxy
 ├── package.json        # "type": "module" (ES Modules)
 ├── Dockerfile
+├── .env.example        # Template environment variable
 ├── .env                # GEMINI_API_KEY (jangan di-commit)
 ├── .gitignore
 └── README.md
@@ -97,6 +99,7 @@ baca-dulu/
 - File limit: 20MB
 - Port: 8080 (Cloud Run default)
 - Guardrail saat ini di prompt-level; rencana upgrade ke gatekeeper layer terpisah
+- Risk flag limit: 5 poin, key points limit: 7 poin
 
 ## Dibuat oleh
 
