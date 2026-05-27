@@ -226,7 +226,7 @@ button#analyze-btn:disabled {
     color: #1d3799;
 }
 
-/* INFORMASI KILAT */
+/* ===== INFORMASI KILAT ===== */
 .info-kilat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -453,6 +453,7 @@ button#analyze-btn:disabled {
     align-items: center;
     user-select: none;
     gap: 8px;
+    min-height: 48px;
 }
 
 .accordion-summary:hover {
@@ -551,5 +552,18 @@ footer {
 
     .result-grid {
         grid-template-columns: 1fr;
+    }
+
+    .accordion-summary {
+        min-height: 52px;
+    }
+
+    .keypoints-list li,
+    .risk-flag-list li {
+        padding: 10px 12px;
+    }
+
+    .info-kilat-grid {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     }
 }

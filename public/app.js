@@ -362,7 +362,7 @@ function parseHasil(teks) {
         });
     }
 
-    return result; 
+    return result;
 }
 
 function stripMarkdown(teks) {
