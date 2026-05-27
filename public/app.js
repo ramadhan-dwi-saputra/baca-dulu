@@ -284,7 +284,7 @@ function parseHasil(teks) {
         if (line.match(/^[-*]\s+/) || line.match(/^\d+\.\s+/)) {
             const raw = line.replace(/^[-*\d.]+\s*/, '').trim();
             // Ekstrak severity tag [TINGGI] / [SEDANG] / [INFO]
-            const severityMatch = raw.match(/^\[(TINGGI|SEDANG|INFO)\]\s*/i);
+            const severityMatch = raw.match(/^\[?(TINGGI|SEDANG|INFO)\]?\s*/i);
             const severity = severityMatch ? severityMatch[1].toLowerCase() : null;
             const teks = stripMarkdown(severityMatch ? raw.slice(severityMatch[0].length) : raw);
             if (teks) result.riskFlag.push({ severity, teks });

@@ -43,7 +43,7 @@ Jika YA, lanjutkan analisis dokumen ini dan berikan output dalam format berikut 
 
 ## 🔴 Perlu Diperhatikan
 Tuliskan HANYA jika ada klausa yang tidak umum, berpotensi merugikan, atau perlu didiskusikan sebelum tanda tangan. Jika tidak ada, tulis "Tidak ditemukan klausa yang perlu diwaspadai."
-Maksimal 5 poin singkat. Awali setiap poin dengan tag tingkat risiko: [TINGGI] untuk klausa berbahaya/merugikan signifikan, [SEDANG] untuk klausa yang perlu diperhatikan, [INFO] untuk informasi penting namun tidak berbahaya.
+Maksimal 5 poin singkat. Awali setiap poin dengan tag tingkat risiko: [TINGGI] untuk klausa berbahaya/merugikan signifikan, [SEDANG] untuk klausa yang perlu diperhatikan, [INFO] untuk informasi penting namun tidak berbahaya. Tag ini WAJIB ada di setiap poin tanpa pengecualian. Jangan pernah menghilangkan tag ini.
 Format setiap poin: - [TINGGI] Penjelasan klausa...
 
 ## 📋 Ringkasan Dokumen
