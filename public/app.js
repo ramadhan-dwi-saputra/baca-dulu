@@ -8,8 +8,6 @@ const errorMessage = document.getElementById('error-message');
 const analyzeBtn = document.getElementById('analyze-btn');
 const uploadState = document.getElementById('upload-state');
 const resultState = document.getElementById('result-state');
-const resultContent = document.getElementById('result-content');
-const resetBtn = document.getElementById('reset-btn');
 
 // ===== STATE =====
 let currentFile = null;
@@ -93,13 +91,6 @@ analyzeBtn.addEventListener('click', async function () {
     }
 });
 
-// ====== RESET BUTTON =====
-resetBtn.addEventListener('click', function () {
-    resetUpload();
-    uploadState.classList.remove('hidden');
-    resultState.classList.add('hidden');
-});
-
 // ===== HELPER FUNCTION =====
 function showFile(name) {
     uploadArea.classList.add('has-file');
@@ -135,10 +126,12 @@ function hideError() {
 function showLoading() {
     uploadState.classList.add('hidden');
     resultState.classList.remove('hidden');
-    resultContent.innerHTML = `
-        <div class="loading-container">
-        <div class="loading-spinner"></div>
-            <p class="loading-text">Sedang menganalisis dokumen...</p>
+    resultState.innerHTML = `
+        <div id="result-content">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Sedang menganalisis dokumen...</p>
+            </div>
         </div>
     `;
 }
@@ -313,6 +306,7 @@ function tampilkanHasil(teks, file, docxText) {
         if (blobUrl) URL.revokeObjectURL(blobUrl);
         resetUpload();
         resultState.innerHTML = '';
+        resultState.classList.add('hidden');
         uploadState.classList.remove('hidden');
     });
     
@@ -320,7 +314,10 @@ function tampilkanHasil(teks, file, docxText) {
 }
 
 function initAccordion() {
-    const summaries = resultContent.querySelectorAll('.accordion-summary');
+    const container = document.getElementById('result-content');
+    if (!container) return;
+
+    const summaries = container.querySelectorAll('.accordion-summary');
     summaries.forEach(function(summary) {
         summary.addEventListener('click', function() {
             const body = this.nextElementSibling;
