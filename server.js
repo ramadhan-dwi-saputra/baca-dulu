@@ -72,9 +72,11 @@ Jelaskan isi dokumen per pasal/bagian dengan bahasa sehari-hari. Singkat dan pad
 ⚠️ Dokumen ini hanya dijelaskan untuk membantu pemahaman, bukan nasihat hukum resmi.`;
 
     try {
+        let extractedText = null;
         if (isDocx) {
             // Ekstrak teks dari DOCX pakai mammoth
-            const { value: extractedText } = await mammoth.extractRawText({ buffer: req.file.buffer });
+            const { value: docxRaw } = await mammoth.extractRawText({ buffer: req.file.buffer });
+            extractedText = docxRaw;
 
             if (!extractedText || extractedText.trim().length === 0) {
                 return res.status(422).json({ error: 'Dokumen DOCX tidak bisa dibaca. Pastikan file tidak kosong atau terproteksi.' });
@@ -120,7 +122,11 @@ Jelaskan isi dokumen per pasal/bagian dengan bahasa sehari-hari. Singkat dan pad
             });
         }
 
-        res.json({ result: hasilTeks });
+        const responsePayload = { result: hasilTeks };
+        if (isDocx && extractedText) {
+            responsePayload.docxText = extractedText;
+        }
+        res.json(responsePayload);
 
     } catch (err) {
         console.error('Proxy error:', err);

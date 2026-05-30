@@ -11,6 +11,9 @@ const resultState = document.getElementById('result-state');
 const resultContent = document.getElementById('result-content');
 const resetBtn = document.getElementById('reset-btn');
 
+// ===== STATE =====
+let currentFile = null;
+
 // ===== UPLOAD AREA CLICK =====
 uploadArea.addEventListener('click', function () {
   fileInput.click();
@@ -49,6 +52,7 @@ fileInput.addEventListener('change', function () {
     }
     
     showFile(file.name);
+    currentFile = file;
 })
 
 // ===== CLEAR FILE =====
@@ -72,7 +76,7 @@ analyzeBtn.addEventListener('click', async function () {
             method: 'POST',
             body: formData
         });
-
+        
         const data = await response.json();
 
         if (!response.ok) {
@@ -81,7 +85,7 @@ analyzeBtn.addEventListener('click', async function () {
             return;
         }
             
-        tampilkanHasil(data.result);
+        tampilkanHasil(data.result, currentFile, data.docxText || null);
 
     } catch (err) {
         showError('Terjadi kesalahan koneksi. Periksa internet dan coba lagi.');
@@ -107,6 +111,7 @@ function showFile(name) {
 
 function resetUpload() {
     fileInput.value = '';
+    currentFile = null;
     uploadArea.classList.remove('has-file');
     fileInfo.classList.add('hidden');
     fileNameDisplay.textContent = '';
@@ -145,13 +150,23 @@ function resetAnalyzebtn() {
     analyzeBtn.textContent = 'Analisis Dokumen';
 }
 
-function tampilkanHasil(teks) {
+function tampilkanHasil(teks, file, docxText) {
     uploadState.classList.add('hidden');
     resultState.classList.remove('hidden');
 
     const sections = parseHasil(teks);
+    const isDesktop = window.innerWidth >= 1024;
+    const isPdf = file && file.type === 'application/pdf';
+    const isImage = file && file.type.startsWith('image/');
+    const isDocx = file && (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.name.toLowerCase().endsWith('.docx'))
 
-    resultContent.innerHTML = `
+    // Buat blob URL untuk PD/image
+    let blobUrl = null;
+    if ((isPdf || isImage) && file) {
+        blobUrl = URL.createObjectURL(file);
+    }
+
+    const analysisHTML = `
         ${sections.riskFlag.length > 0 ? `
         <div class="result-card card-risk-flag">
             <div class="card-header">
@@ -161,9 +176,11 @@ function tampilkanHasil(teks) {
             <ul class="risk-flag-list">
                 ${sections.riskFlag.map((item, i) => `
                     <li>
-                        <span class="risk-flag-number">${i + 1}</span>
-                        ${item.severity ? `<span class="risk-flag-badge ${item.severity}">${item.severity === 'tinggi' ? 'Tinggi' : item.severity === 'sedang' ? 'Sedang' : 'Info'}</span>` : ''}
-                        <span>${item.teks}</span>
+                        <div class="risk-flag-top">
+                            <span class="risk-flag-number">${i + 1}</span>
+                            ${item.severity ? `<span class="risk-flag-badge ${item.severity}">${item.severity === 'tinggi' ? 'Tinggi' : item.severity === 'sedang' ? 'Sedang' : 'Info'}</span>` : ''}
+                        </div>
+                        <div class="risk-flag-body">${item.teks}</div>
                     </li>
                 `).join('')}
             </ul>
@@ -228,6 +245,77 @@ function tampilkanHasil(teks) {
         </div>
     `;
 
+    // Build viewer HTML
+    let viewerHTML = '';
+    if (isPdf && blobUrl) {
+        viewerHTML = `<iframe src="${blobUrl}" class="doc-viewer-iframe" title="Dokumen Asli"></iframe>`;
+    } else if (isImage && blobUrl) {
+        viewerHTML = `<div class="doc-viewer-image-wrap"><img src="${blobUrl}" class="doc-viewer-image" alt="Dokumen Asli" /></div>`;
+    } else if (isDocx && docxText) {
+        viewerHTML = `<div class="doc-viewer-text"><pre>${docxText.replace(/</g,'&lt;').replace(/>/g, '&gt;')}</pre></div>`;
+    }
+
+    if (isDesktop && viewerHTML) {
+        // Side-by-side layout
+        resultState.innerHTML = `
+            <button id="reset-btn">← Analisis Dokumen Lain</button>
+            <div class="split-layout">
+                <div class="split-analysis">
+                    <div id="result-content">${analysisHTML}</div>
+                </div>
+                <div class="split-viewer">
+                    <div>
+                        <span class="viewer-title">📄 Dokumen Asli</span>
+                    </div>
+                    <div class="viewer-body">
+                        ${viewerHTML}
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (!isDesktop && viewerHTML) {
+        // Tab layout mobile
+        resultState.innerHTML = `
+            <button id="reset-btn">← Analisis Dokumen Lain</button>
+            <div class="tab-bar">
+                <button class="tab-btn active" data-tab="analisis">📋 Analisis</button>
+                <button class="tab-btn" data-tab="dokumen">📄 Dokumen Asli</button>
+            </div>
+            <div>
+                <div id="result-content">${analysisHTML}</div>
+            </div>
+            <div class="tab-panel hidden" id="tab-dokumen">
+                <div class="viewer-body viewer-body-mobile">
+                    ${viewerHTML}
+                </div>
+            </div>
+        `;
+        // Tab Switching
+        resultState.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                resultState.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const target = this.dataset.tab;
+                resultState.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById('tab-' + target).classList.remove('hidden');
+            });
+        });
+    } else {
+        // No viewer (DOCX tanpa text fallback, atau format lain)
+        resultState.innerHTML = `
+            <button id="reset-btn">← Analisis Dokumen Lain</button>
+            <div id="result-content">${analysisHTML}</div>
+        `;
+    }
+
+    // Re-bind reset btn karena innerHTML diganti
+    document.getElementById('reset-btn').addEventListener('click', function () {
+        if (blobUrl) URL.revokeObjectURL(blobUrl);
+        resetUpload();
+        resultState.innerHTML = '';
+        uploadState.classList.remove('hidden');
+    });
+    
     initAccordion();
 }
 
@@ -290,6 +378,12 @@ function parseHasil(teks) {
             if (teks) result.riskFlag.push({ severity, teks });
         }
     });
+
+    // Sort: TINGGI → SEDANG → INFO
+    const SEVERITY_ORDER = { tinggi: 0, sedang: 1, info: 2 };
+    result.riskFlag.sort((a, b) =>
+        (SEVERITY_ORDER[a.severity] ?? 3) - (SEVERITY_ORDER[b.severity] ?? 3)
+    );
 
     // ===== RINGKASAN =====
     const ringkasanText = getSectionText('Ringkasan Dokumen');
