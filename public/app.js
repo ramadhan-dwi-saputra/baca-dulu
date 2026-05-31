@@ -153,9 +153,10 @@ function tampilkanHasil(teks, file, docxText) {
     const isImage = file && file.type.startsWith('image/');
     const isDocx = file && (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.name.toLowerCase().endsWith('.docx'))
 
-    // Buat blob URL untuk PD/image
+    // Buat blob URL hanya untuk image (bukan PDF)
+    // PDF pakai data URL via FileReader agar tidak diblokir mobile browser
     let blobUrl = null;
-    if ((isPdf || isImage) && file) {
+    if (isImage && file) {
         blobUrl = URL.createObjectURL(file);
     }
 
@@ -240,8 +241,10 @@ function tampilkanHasil(teks, file, docxText) {
 
     // Build viewer HTML
     let viewerHTML = '';
-    if (isPdf && blobUrl) {
-        viewerHTML = `<iframe src="${blobUrl}" class="doc-viewer-iframe" title="Dokumen Asli"></iframe>`;
+    if (isPdf && file) {
+        // Pakai placeholder dulu, iframe PDF akan diisi async via FileReader
+        // agar tidak diblokir mobile browser (blob URL di iframe diblokir Chrome mobile)
+        viewerHTML = `<div id="pdf-viewer-placeholder" class="doc-viewer-iframe" style="display:flex;align-items:center;justify-content:center;background:#f5f5f5;color:#888;font-size:14px;">Memuat dokumen...</div>`;
     } else if (isImage && blobUrl) {
         viewerHTML = `<div class="doc-viewer-image-wrap"><img src="${blobUrl}" class="doc-viewer-image" alt="Dokumen Asli" /></div>`;
     } else if (isDocx && docxText) {
@@ -301,9 +304,29 @@ function tampilkanHasil(teks, file, docxText) {
         `;
     }
 
+    // Inject PDF viewer secara async via FileReader (data URL lebih reliable dari blob URL di mobile)
+    if (isPdf && file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const dataUrl = e.target.result;
+            const iframeHTML = `<iframe src="${dataUrl}" class="doc-viewer-iframe" title="Dokumen Asli"></iframe>`;
+            const placeholder = document.getElementById('pdf-viewer-placeholder');
+            if (placeholder) {
+                placeholder.outerHTML = iframeHTML;
+            }
+        };
+        reader.onerror = function() {
+            const placeholder = document.getElementById('pdf-viewer-placeholder');
+            if (placeholder) {
+                placeholder.textContent = 'Gagal memuat pratinjau dokumen.';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
     // Re-bind reset btn karena innerHTML diganti
     document.getElementById('reset-btn').addEventListener('click', function () {
-        if (blobUrl) URL.revokeObjectURL(blobUrl);
+        if (blobUrl) URL.revokeObjectURL(blobUrl); // hanya image yang punya blobUrl
         resetUpload();
         resultState.innerHTML = '';
         resultState.classList.add('hidden');
