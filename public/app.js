@@ -64,6 +64,9 @@ analyzeBtn.addEventListener('click', async function () {
     const file = fileInput.files[0];
     if (!file) return;
 
+    // Simpan file reference sebelum fetch async agar tidak expired di mobile
+    const fileSnapshot = file;
+
     showLoading();
 
     const formData = new FormData();
@@ -83,7 +86,7 @@ analyzeBtn.addEventListener('click', async function () {
             return;
         }
             
-        tampilkanHasil(data.result, currentFile, data.docxText || null);
+        tampilkanHasil(data.result, fileSnapshot, data.docxText || null);
 
     } catch (err) {
         showError('Terjadi kesalahan koneksi. Periksa internet dan coba lagi.');
@@ -277,7 +280,7 @@ function tampilkanHasil(teks, file, docxText) {
                 <button class="tab-btn active" data-tab="analisis">📋 Analisis</button>
                 <button class="tab-btn" data-tab="dokumen">📄 Dokumen Asli</button>
             </div>
-            <div>
+            <div class="tab-panel" id="tab-analisis">
                 <div id="result-content">${analysisHTML}</div>
             </div>
             <div class="tab-panel hidden" id="tab-dokumen">
@@ -308,20 +311,38 @@ function tampilkanHasil(teks, file, docxText) {
     if (isPdf && file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const dataUrl = e.target.result;
-            const iframeHTML = `<iframe src="${dataUrl}" class="doc-viewer-iframe" title="Dokumen Asli"></iframe>`;
+            const arrayBuffer = e.target.result;
             const placeholder = document.getElementById('pdf-viewer-placeholder');
-            if (placeholder) {
-                placeholder.outerHTML = iframeHTML;
-            }
+            if (!placeholder) return;
+
+            placeholder.innerHTML = '<div id="pdf-canvas-container" style="overflow-y:auto;height:auto;min-height:70vh;padding:8px;box-sizing:border-box;background:#525659;"></div>';
+            const container = document.getElementById('pdf-canvas-container');
+
+            pdfjsLib.getDocument({ data: arrayBuffer }).promise.then(function(pdf) {
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    pdf.getPage(pageNum).then(function(page) {
+                        const viewport = page.getViewport({ scale: 1.2 });
+                        const canvas = document.createElement('canvas');
+                        canvas.style.display = 'block';
+                        canvas.style.margin = '0 auto 8px auto';
+                        canvas.style.maxWidth = '100%';
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        container.appendChild(canvas);
+                        page.render({ canvasContext: canvas.getContext('2d'), viewport });
+                    });
+                }
+            }).catch(function(err) {
+                console.error('PDF.js error:', err);
+                const c = document.getElementById('pdf-canvas-container');
+                if (c) c.textContent = 'Gagal memuat pratinjau dokumen.';
+            });
         };
         reader.onerror = function() {
             const placeholder = document.getElementById('pdf-viewer-placeholder');
-            if (placeholder) {
-                placeholder.textContent = 'Gagal memuat pratinjau dokumen.';
-            }
+            if (placeholder) placeholder.textContent = 'Gagal memuat pratinjau dokumen.';
         };
-        reader.readAsDataURL(file);
+        reader.readAsArrayBuffer(file);
     }
 
     // Re-bind reset btn karena innerHTML diganti

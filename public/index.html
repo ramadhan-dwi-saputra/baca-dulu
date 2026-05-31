@@ -59,7 +59,11 @@
     <footer>
       <p>⚠️ Hasil analisis hanya untuk membantu pemahaman, bukan nasihat hukum resmi. Konsultasikan dengan ahli hukum untuk keputusan penting.</p>
     </footer>
-
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
     <script src="app.js?v=2"></script>
 </body>
 </html>
