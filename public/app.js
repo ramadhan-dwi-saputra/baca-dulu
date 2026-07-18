@@ -64,8 +64,17 @@ analyzeBtn.addEventListener('click', async function () {
     const file = fileInput.files[0];
     if (!file) return;
 
-    // Simpan file reference sebelum fetch async agar tidak expired di mobile
-    const fileSnapshot = file;
+    // Baca PDF sebagai base64 via FileReader SEBELUM fetch
+    // file.arrayBuffer() tidak reliable di Chrome Android — file jadi 0 bytes
+    let pdfBase64 = null;
+    if (file.type === 'application/pdf') {
+        pdfBase64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = e => resolve(e.target.result);
+            reader.onerror = () => reject(new Error('FileReader error'));
+            reader.readAsDataURL(file);
+        });
+    }
 
     showLoading();
 
@@ -86,7 +95,7 @@ analyzeBtn.addEventListener('click', async function () {
             return;
         }
             
-        tampilkanHasil(data.result, fileSnapshot, data.docxText || null);
+        tampilkanHasil(data.result, file, data.docxText || null, pdfBase64);
 
     } catch (err) {
         showError('Terjadi kesalahan koneksi. Periksa internet dan coba lagi.');
@@ -146,7 +155,7 @@ function resetAnalyzebtn() {
     analyzeBtn.textContent = 'Analisis Dokumen';
 }
 
-function tampilkanHasil(teks, file, docxText) {
+function tampilkanHasil(teks, file, docxText, pdfBase64 = null) {
     uploadState.classList.add('hidden');
     resultState.classList.remove('hidden');
 
@@ -156,10 +165,11 @@ function tampilkanHasil(teks, file, docxText) {
     const isImage = file && file.type.startsWith('image/');
     const isDocx = file && (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.name.toLowerCase().endsWith('.docx'))
 
-    // Buat blob URL hanya untuk image (bukan PDF)
-    // PDF pakai data URL via FileReader agar tidak diblokir mobile browser
+    // Desktop PDF pakai blob URL (iframe), mobile pakai PDF.js canvas
     let blobUrl = null;
     if (isImage && file) {
+        blobUrl = URL.createObjectURL(file);
+    } else if (isPdf && file && isDesktop) {
         blobUrl = URL.createObjectURL(file);
     }
 
@@ -244,9 +254,11 @@ function tampilkanHasil(teks, file, docxText) {
 
     // Build viewer HTML
     let viewerHTML = '';
-    if (isPdf && file) {
-        // Pakai placeholder dulu, iframe PDF akan diisi async via FileReader
-        // agar tidak diblokir mobile browser (blob URL di iframe diblokir Chrome mobile)
+    if (isPdf && file && isDesktop) {
+        // Desktop: blob URL di iframe aman
+        viewerHTML = `<iframe src="${blobUrl}" class="doc-viewer-iframe" title="Dokumen Asli"></iframe>`;
+    } else if (isPdf && file && !isDesktop) {
+        // Mobile: placeholder, diisi PDF.js canvas secara async
         viewerHTML = `<div id="pdf-viewer-placeholder" class="doc-viewer-iframe" style="display:flex;align-items:center;justify-content:center;background:#f5f5f5;color:#888;font-size:14px;">Memuat dokumen...</div>`;
     } else if (isImage && blobUrl) {
         viewerHTML = `<div class="doc-viewer-image-wrap"><img src="${blobUrl}" class="doc-viewer-image" alt="Dokumen Asli" /></div>`;
@@ -307,18 +319,18 @@ function tampilkanHasil(teks, file, docxText) {
         `;
     }
 
-    // Inject PDF viewer secara async via FileReader (data URL lebih reliable dari blob URL di mobile)
-    if (isPdf && file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const arrayBuffer = e.target.result;
-            const placeholder = document.getElementById('pdf-viewer-placeholder');
-            if (!placeholder) return;
-
+    // Inject PDF viewer via PDF.js canvas — hanya mobile, pakai pdfArrayBuffer yang dibaca sebelum fetch
+    if (isPdf && !isDesktop && pdfBase64) {
+        const placeholder = document.getElementById('pdf-viewer-placeholder');
+        if (placeholder) {
             placeholder.innerHTML = '<div id="pdf-canvas-container" style="overflow-y:auto;height:auto;min-height:70vh;padding:8px;box-sizing:border-box;background:#525659;"></div>';
             const container = document.getElementById('pdf-canvas-container');
-
-            pdfjsLib.getDocument({ data: arrayBuffer }).promise.then(function(pdf) {
+            // Konversi base64 data URL ke Uint8Array untuk PDF.js
+            const base64 = pdfBase64.split(',')[1];
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            pdfjsLib.getDocument({ data: bytes }).promise.then(function(pdf) {
                 for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                     pdf.getPage(pageNum).then(function(page) {
                         const viewport = page.getViewport({ scale: 1.2 });
@@ -337,12 +349,7 @@ function tampilkanHasil(teks, file, docxText) {
                 const c = document.getElementById('pdf-canvas-container');
                 if (c) c.textContent = 'Gagal memuat pratinjau dokumen.';
             });
-        };
-        reader.onerror = function() {
-            const placeholder = document.getElementById('pdf-viewer-placeholder');
-            if (placeholder) placeholder.textContent = 'Gagal memuat pratinjau dokumen.';
-        };
-        reader.readAsArrayBuffer(file);
+        }
     }
 
     // Re-bind reset btn karena innerHTML diganti
